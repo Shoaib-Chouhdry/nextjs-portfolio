@@ -25,8 +25,10 @@ export function useCustomHook() {
     const isFirstStep = currentStep === 0;
     const isLastStep = currentStep === steps.length - 1;
     const getCurrentStepSchema = () => stepSchemas[currentStep];
+   
 
     const goToNextStep = () => {
+      console.log(currentStep)
       if (!isLastStep) setCurrentStep((prev) => prev + 1);
     };
   

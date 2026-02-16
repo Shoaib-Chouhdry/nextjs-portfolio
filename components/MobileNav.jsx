@@ -1,48 +1,80 @@
 "use client";
-import { Sheet,SheetContent,SheetTrigger } from "./ui/sheet";
-import { usePathname } from "next/navigation";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import {CiMenuFries} from "react-icons/ci"
+import { HiMenuAlt3, HiX } from "react-icons/hi";
 
-const Links = [
-    {
-      name:"home",
-      path:"/"  
-    },
-    {
-        name:"contact",
-        path:"/contact"
-    }
-]
-
+const links = [
+  { name: "home", path: "/" },
+  { name: "about", path: "#about" },
+  { name: "skills", path: "#skills" },
+  { name: "experience", path: "#experience" },
+  { name: "projects", path: "#projects" },
+  { name: "contact", path: "/contact" },
+];
 
 const MobileNav = () => {
-    const pathname = usePathname()
+  const [open, setOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState("");
+
+  // Detect active section on scroll
+  useEffect(() => {
+    const sections = document.querySelectorAll("section[id]");
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveSection(entry.target.id);
+          }
+        });
+      },
+      {
+        threshold: 0.6,
+      }
+    );
+
+    sections.forEach((section) => observer.observe(section));
+
+    return () => observer.disconnect();
+  }, []);
 
   return (
-    <Sheet>
-        <SheetTrigger className="flex justify-center items-center">
-            <CiMenuFries className="text-[32px] text-accent"/>
-        </SheetTrigger>
-        <SheetContent className="flex flex-col ">
-           <div className="mt-32 mb-40 text-center text-2xl">
-             <Link href="/">
-               <h1 className="text-4xl font-semibold"> Shoaib </h1>
-             </Link>
-           </div>
-           <nav className="flex flex-col justify-center items-center gap-8">
-             {
-                Links.map((link,index)=>{
-                   return <Link href={link.path} key={index} className={`${link.path === pathname && 
-                                  "text-accent border-b-2 border-accent"} text-xl capitalize font-medium hover:text-accent transition-all`}>
-                                    {link.name}
-                          </Link>
-                })
-             }
-           </nav>
-        </SheetContent>
-    </Sheet>
-  )
-}
+    <div className="xl:hidden">
+      <button
+        onClick={() => setOpen(!open)}
+        className="text-3xl text-accent"
+      >
+        {open ? <HiX /> : <HiMenuAlt3 />}
+      </button>
 
-export default MobileNav
+      {open && (
+        <div className="fixed top-[90px] left-0 w-full bg-primary border-t border-white/10 z-50">
+          <nav className="flex flex-col items-center gap-8 py-10">
+            {links.map((link) => {
+              const isActive =
+                link.path.includes(activeSection) && activeSection !== "";
+
+              return (
+                <Link
+                  key={link.name}
+                  href={link.path}
+                  onClick={() => setOpen(false)}
+                  className={`capitalize text-lg font-medium transition-all
+                    ${
+                      isActive
+                        ? "text-accent"
+                        : "text-white hover:text-accent"
+                    }`}
+                >
+                  {link.name}
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default MobileNav;
